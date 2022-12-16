@@ -31,19 +31,22 @@ function rz_single_product_use_block_editor(){
 
 	if( is_product() ) {
 
-		// Change the breadcrumb position from before main to before single product summary
-		remove_filter('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20);
-		add_filter('woocommerce_before_single_product_summary', 'woocommerce_breadcrumb');
-		
-
 		// Get the content of the product page
 		$product_description = get_the_content();
 
 		// if RZ_PRODUCT_PLACEHOLDER_SHORTCODE exists in the content of the product page, split the content and show the two parts before and after the shortcode
 		if( strpos($product_description, RZ_PRODUCT_PLACEHOLDER_SHORTCODE) !== false ) {
 
+			// Change the breadcrumb position from before main to before single product summary
+			remove_filter('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20);
+			add_filter('woocommerce_before_single_product_summary', 'woocommerce_breadcrumb');
+
+			// Add filter to remove the description tab
+			add_filter( 'woocommerce_product_tabs', 'rz_remove_description_tabs', 20 );
+
+
+			// Use product description as the page builder content
 			$product_description = explode( RZ_PRODUCT_PLACEHOLDER_SHORTCODE, $product_description );
-			
 			add_filter('woocommerce_before_main_content', function() use ($product_description) {
 				echo $product_description[0];
 			}, 20);
@@ -53,4 +56,10 @@ function rz_single_product_use_block_editor(){
 			}, 200);
 		}
 	}
+}
+
+// Remove the description tab from the product page
+function rz_remove_description_tabs( $tabs ) {
+	unset( $tabs['description'] );
+	return $tabs;
 }
